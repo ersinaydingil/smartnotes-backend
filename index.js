@@ -38,7 +38,7 @@ app.post("/api/ai/generate", verifySecret, (req, res) => {
     if (!apiKey) return res.status(500).json({ error: "API key eksik." });
 
     const body = JSON.stringify({
-        model: "openai/gpt-oss-20b:free",
+        model: "meta-llama/llama-3.2-3b-instruct:free",
         messages: [{ role: "user", content: prompt }],
         max_tokens: maxTokens
     });
@@ -62,10 +62,16 @@ app.post("/api/ai/generate", verifySecret, (req, res) => {
         proxyRes.on("end", () => {
             try {
                 const json = JSON.parse(data);
-                const text = json?.choices?.[0]?.message?.content || "";
+                const choice = json?.choices?.[0];
+                const text = choice?.message?.content || "";
                 if (!text) {
-                    console.error("OpenRouter boş yanıt:", JSON.stringify(json));
-                    return res.status(502).json({ error: "Boş yanıt." });
+                    // reasoning modellerde content boş olabilir, reasoning_content dene
+                    const reasoning = choice?.message?.reasoning || "";
+                    if (!reasoning) {
+                        console.error("OpenRouter boş yanıt:", JSON.stringify(json));
+                        return res.status(502).json({ error: "Boş yanıt." });
+                    }
+                    return res.json({ text: reasoning.trim() });
                 }
                 res.json({ text: text.trim() });
             } catch (e) {
