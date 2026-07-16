@@ -65,7 +65,7 @@ app.post("/api/ai/generate", verifySecret, (req, res) => {
                 const choice = json?.choices?.[0];
                 const rawContent = choice?.message?.content;
                 const reasoning  = choice?.message?.reasoning || "";
-                const text = (rawContent && rawContent !== "null") ? rawContent : reasoning;
+                const text = (rawContent != null && rawContent !== "") ? rawContent : reasoning;
                 if (!text) {
                     console.error("OpenRouter boş yanıt:", JSON.stringify(json).substring(0, 300));
                     return res.status(502).json({ error: "Boş yanıt." });
