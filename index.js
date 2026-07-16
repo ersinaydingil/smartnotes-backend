@@ -38,7 +38,7 @@ app.post("/api/ai/generate", verifySecret, (req, res) => {
     if (!apiKey) return res.status(500).json({ error: "API key eksik." });
 
     const body = JSON.stringify({
-        model: "openai/gpt-oss-20b:free",
+        model: "meta-llama/llama-3.2-3b-instruct:free",
         messages: [{ role: "user", content: prompt }],
         max_tokens: maxTokens
     });
