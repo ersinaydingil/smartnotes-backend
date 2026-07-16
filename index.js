@@ -63,15 +63,12 @@ app.post("/api/ai/generate", verifySecret, (req, res) => {
             try {
                 const json = JSON.parse(data);
                 const choice = json?.choices?.[0];
-                const text = choice?.message?.content || "";
+                const rawContent = choice?.message?.content;
+                const reasoning  = choice?.message?.reasoning || "";
+                const text = (rawContent && rawContent !== "null") ? rawContent : reasoning;
                 if (!text) {
-                    // reasoning modellerde content boş olabilir, reasoning_content dene
-                    const reasoning = choice?.message?.reasoning || "";
-                    if (!reasoning) {
-                        console.error("OpenRouter boş yanıt:", JSON.stringify(json));
-                        return res.status(502).json({ error: "Boş yanıt." });
-                    }
-                    return res.json({ text: reasoning.trim() });
+                    console.error("OpenRouter boş yanıt:", JSON.stringify(json).substring(0, 300));
+                    return res.status(502).json({ error: "Boş yanıt." });
                 }
                 res.json({ text: text.trim() });
             } catch (e) {
